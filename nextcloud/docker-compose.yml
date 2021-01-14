@@ -1,0 +1,107 @@
+---
+version: '2'
+services:
+  db:
+    image: mariadb:10.5.8
+    restart: unless-stopped
+    volumes:
+     - db:/var/lib/mysql
+    # These are only used on the first startup to create the initial database
+    # and user. Put a random password in the env file before upping this.
+    # After the first run, these can be disabled again (at least remove the
+    # password to prevent leaking it).
+    # TODO: Use compose v3 format "secrets" for the password? backup container
+    # does not seem to support passing a filename, though.
+    #environment:
+    #  MYSQL_USER: nextcloud
+    #  MYSQL_PASSWORD: password
+    #  MYSQL_DATABASE: nextcloud
+    #  MYSQL_RANDOM_ROOT_PASSWORD: 1
+    #env_file:
+    # - mysql-pw.env
+
+  nextcloud:
+    image:  nextcloud:20.0.4-apache
+    #image:  nextcloud:20.0.4-apache
+    restart: unless-stopped
+    environment:
+      # Tell Nextcloud that the nginx reverse proxy handles HTTPS
+      OVERWRITEPROTOCOL: https
+      VIRTUAL_HOST: nextcloud.planb.coop
+      LETSENCRYPT_HOST: nextcloud.planb.coop
+
+      # This is only used on initial setup
+      #MYSQL_HOST: db
+      #MYSQL_DATABASE: nextcloud
+      #MYSQL_USER: nextcloud
+      #SMTP_HOST: smtp-sender
+    #env_file:
+    # - mysql-pw.env
+    volumes:
+      - code:/var/www/html
+      - data:/var/www/html/data
+    depends_on:
+      - db
+    networks:
+      default:
+      nginx-proxy:
+      smtp-sender:
+
+  nextcloud-cron:
+    image:  nextcloud:20.0.4-apache
+    restart: unless-stopped
+    volumes_from:
+      - nextcloud
+    entrypoint: /cron.sh
+    depends_on:
+      - nextcloud
+    networks:
+      default:
+      smtp-sender:
+
+  collabora:
+    image:  collabora/code:6.4.3.1
+    restart: unless-stopped
+    environment:
+      domain: nextcloud.planb.coop
+      VIRTUAL_HOST: collabora.planb.coop
+      # TODO: Can this also use HTTP, since nginx already adds https?
+      # Adding --o:ssl.enable=false to extra_params seems to make Collabora
+      # happy, but something (maybe Nextcloud) then gets confused.
+      VIRTUAL_PROTO: https
+      LETSENCRYPT_HOST: collabora.planb.coop
+      extra_params: --o:user_interface.mode=classic
+    cap_add:
+     - MKNOD
+    networks:
+      nginx-proxy:
+
+  # This is a bit rough and uncoordinated with the system backup, but
+  db-backup:
+    image: zeenlym/mariadb-backup
+    volumes:
+      - db-backup:/backup
+    environment:
+        - TIMEZONE=Europe/Berlin
+        - SCHEDULE=0 0 0 * * *
+        - BACKUP_METHOD=mysqldump
+        - MYSQL_HOST=db
+        - MYSQL_DATABASE=nextcloud
+        - MYSQL_USER=nextcloud
+    env_file:
+     - mysql-pw.env
+
+volumes:
+  db:
+  db-backup:
+  code:
+  data:
+
+networks:
+  # Connect to nginx and smtp server through their own, existing, networks.
+  nginx-proxy:
+    external: true
+  smtp-sender:
+    external: true
+
+# vim: set sw=2 sts=2 et:

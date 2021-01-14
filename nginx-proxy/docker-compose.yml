@@ -1,0 +1,52 @@
+# This sets up a Letsencrypt-enabled nginx reverse proxy that can dispatch
+# HTTP(S) requests to containers based on their env variables (one virtual
+# hostname per container).
+# To be able to reach these hosts, they must be attached to our dedicated
+# network.
+---
+version: '2'
+services:
+  nginx:
+    image: jwilder/nginx-proxy:0.8.0
+    restart: unless-stopped
+    volumes:
+     - nginx-certs:/etc/nginx/certs
+     - nginx-vhosts:/etc/nginx/vhost.d
+     - nginx-html:/usr/share/nginx/html
+     - /etc/docker-nginx/htpasswd:/etc/nginx/htpasswd
+     - /var/run/docker.sock:/tmp/docker.sock:ro
+    ports:
+     - 80:80
+     - 443:443
+    environment:
+     - ENABLE_IPV6=true
+
+  letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion:2.0.2
+    restart: unless-stopped
+    volumes_from:
+     - nginx
+    volumes:
+     - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+     - DEFAULT_EMAIL=website@dewar.nl
+
+volumes:
+  nginx-certs:
+  nginx-vhosts:
+  nginx-html:
+
+networks:
+  # Use a global network that can also be used by other containers that need
+  # to be proxied by us. This network must be created before starting use
+  # with:
+  #    docker network create nginx-proxy --ipv6
+
+  # Note that we cannot seem to connect to the default "bridge" network *and*
+  # our own network, so this means any container that needs our proxying needs
+  # to connect to our network...
+  default:
+    external:
+      name: nginx-proxy
+
+# vim: set sw=2 sts=2 et:

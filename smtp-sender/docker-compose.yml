@@ -1,0 +1,24 @@
+# Simple outgoing SMTP server to be used by other containers.
+---
+version: '2'
+services:
+  smtp-sender:
+    image: namshi/smtp
+    restart: unless-stopped
+    environment:
+     - MAILNAME=planbhosting.planb.coop
+
+networks:
+  # Use a global network that can also be used by other containers that need
+  # to mail through us. This network must be created before starting use
+  # with:
+  #    docker network create smtp-sender
+
+  # Note that we cannot seem to connect to the default "bridge" network *and*
+  # our own network, so this means any container that needs our proxying needs
+  # to connect to our network...
+  default:
+    external:
+      name: smtp-sender
+
+# vim: set sw=2 sts=2 et:
