@@ -3,7 +3,11 @@
 version: '2'
 services:
   smtp-sender:
-    image: namshi/smtp
+    #image: namshi/smtp
+    # Build our own image until https://github.com/namshi/docker-smtp/pull/78 is merged
+    build:
+      context: ./docker-smtp
+      dockerfile: Dockerfile
     restart: unless-stopped
     environment:
      - MAILNAME=planbhosting.planb.coop
