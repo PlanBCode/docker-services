@@ -1,0 +1,16 @@
+---
+version: '2'
+services:
+  mjml:
+    image: adrianrudnik/maintenance-server
+    environment:
+      VIRTUAL_HOST: nextcloud.planb.coop
+      LETSENCRYPT_HOST: nextcloud.planb.coop
+
+networks:
+  # Connect to nginx and smtp server through their own, existing, networks.
+  default:
+    external:
+      name: nginx-proxy
+
+# vim: set sw=2 sts=2 et:
