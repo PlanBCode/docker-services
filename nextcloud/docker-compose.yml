@@ -21,7 +21,7 @@ services:
     # - mysql-pw.env
 
   nextcloud:
-    image:  nextcloud:20.0.4-apache
+    image:  nextcloud:21.0.1-apache
     #image:  nextcloud:20.0.4-apache
     restart: unless-stopped
     environment:
@@ -48,7 +48,7 @@ services:
       smtp-sender:
 
   nextcloud-cron:
-    image:  nextcloud:20.0.4-apache
+    image:  nextcloud:21.0.1-apache
     restart: unless-stopped
     volumes_from:
       - nextcloud
