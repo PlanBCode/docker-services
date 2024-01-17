@@ -2,7 +2,7 @@
 version: '2'
 services:
   db:
-    image: mariadb:10.5.8
+    image: mariadb:11.2.2
     restart: unless-stopped
     volumes:
      - db:/var/lib/mysql
@@ -13,6 +13,7 @@ services:
     # TODO: Use compose v3 format "secrets" for the password? backup container
     # does not seem to support passing a filename, though.
     #environment:
+    #  MARIADB_AUTO_UPGRADE: 1
     #  MYSQL_USER: nextcloud
     #  MYSQL_PASSWORD: password
     #  MYSQL_DATABASE: nextcloud
@@ -21,8 +22,7 @@ services:
     # - mysql-pw.env
 
   nextcloud:
-    image:  nextcloud:21.0.1-apache
-    #image:  nextcloud:20.0.4-apache
+    image:  nextcloud:28.0.1-apache
     restart: unless-stopped
     environment:
       # Tell Nextcloud that the nginx reverse proxy handles HTTPS
@@ -48,7 +48,7 @@ services:
       smtp-sender:
 
   nextcloud-cron:
-    image:  nextcloud:21.0.1-apache
+    image:  nextcloud:28.0.1-apache
     restart: unless-stopped
     volumes_from:
       - nextcloud
@@ -60,7 +60,7 @@ services:
       smtp-sender:
 
   collabora:
-    image:  collabora/code:6.4.3.1
+    image:  collabora/code:23.05.7.2.1
     restart: unless-stopped
     environment:
       domain: nextcloud.planb.coop
