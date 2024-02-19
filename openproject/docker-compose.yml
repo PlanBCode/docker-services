@@ -1,0 +1,40 @@
+---
+version: '2'
+services:
+  openproject:
+    image: openproject/community:13
+    volumes:
+      - ./nginx-config:/etc/nginx/templates
+      - ./htdocs:/data/htdocs
+    #ports:
+    #  - 127.0.0.1:8080:80
+    environment:
+      - VIRTUAL_HOST=project.planb.coop
+      - LETSENCRYPT_HOST=project.planb.coop
+      - OPENPROJECT_HOST__NAME=project.planb.coop
+      - OPENPROJECT_HTTPS=true
+      - OPENPROJECT_DEFAULT__LANGUAGE=en
+      - OPENPROJECT_SMTP__ADDRESS=smtp-sender
+      - OPENPROJECT_SMTP__PORT=25
+      - OPENPROJECT_SMTP__DOMAIN=planb.coop
+      - OPENPROJECT_SMTP__AUTHENTICATION=none
+    env_file:
+      - secrets.env
+    volumes:
+      - openproject-db:/var/openproject/pgdata
+      - openproject-data:/var/openproject/assets
+    networks:
+      default:
+      nginx-proxy:
+      smtp-sender:
+
+volumes:
+  openproject-db:
+  openproject-data:
+
+networks:
+  # Connect to nginx and smtp server through their own, existing, networks.
+  nginx-proxy:
+    external: true
+  smtp-sender:
+    external: true
