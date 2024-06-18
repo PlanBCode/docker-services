@@ -1,0 +1,51 @@
+---
+version: '3.2'
+services:
+
+  influxdb:
+    container_name: influxdb
+    image: influxdb:2.7
+    volumes:
+      - 'influxdb-data:/var/lib/influxdb2'
+      - './influxdb:/etc/influxdb2'
+    environment:
+      VIRTUAL_HOST: influx.meetjestad.net
+      LETSENCRYPT_HOST: influx.meetjestad.net
+    networks:
+      default:
+      nginx-proxy:
+      smtp-sender:
+    restart: unless-stopped
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:10.4.4
+    volumes:
+        - grafana-data:/var/lib/grafana
+        - ./grafana/config:/etc/grafana
+    networks:
+      default:
+      nginx-proxy:
+      smtp-sender:
+    environment:
+      # For iframing external sites in dashboards
+      GF_SECURITY_ALLOW_EMBEDDING: "true"
+      VIRTUAL_HOST: grafana.meetjestad.net
+      LETSENCRYPT_HOST: grafana.meetjestad.net
+    links:
+      - influxdb:influx
+    restart: unless-stopped
+    command:
+      - "cfg:auth.generic_oauth.client_id=${OAUTH_CLIENT_ID}"
+      - "cfg:auth.generic_oauth.client_secret=${OAUTH_CLIENT_SECRET}"
+
+networks:
+  # Connect to nginx and smtp server through their own, existing, networks.
+  nginx-proxy:
+    external: true
+  smtp-sender:
+    external: true
+
+volumes:
+  influxdb-data:
+  grafana-data:
