@@ -11,10 +11,13 @@ services:
     restart: unless-stopped
     volumes:
      - nginx-certs:/etc/nginx/certs
-     - nginx-vhosts:/etc/nginx/vhost.d
      - nginx-html:/usr/share/nginx/html
      - /etc/docker-nginx/htpasswd:/etc/nginx/htpasswd
      - /var/run/docker.sock:/tmp/docker.sock:ro
+     # This adds specific files, so the conf.d/default.conf is used from the image (and thus updated on upgrades)
+     - ./nginx.conf.d/client_max_body_size.conf:/etc/nginx/conf.d/client_max_body_size.conf:ro
+     # This just mounts the entire directory, since there is no meaningful default config in there
+     - ./nginx.vhost.d:/etc/nginx/vhost.d
     ports:
      - 80:80
      - 443:443
