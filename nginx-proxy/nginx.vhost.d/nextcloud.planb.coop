@@ -1,1 +1,7 @@
 client_max_body_size 512m;
+
+# This share link was accidentally published in the UTMOST grant application (2024-04)
+# Redirect it to a more appropriate place
+location /s/MXKMNFnkz7mGi6k {
+	return 301 https://www.csdif.info;
+}
