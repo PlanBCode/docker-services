@@ -6,18 +6,20 @@ services:
     restart: unless-stopped
     volumes:
      - db:/var/lib/mysql
-    # These are only used on the first startup to create the initial database
-    # and user. Put a random password in the env file before upping this.
-    # After the first run, these can be disabled again (at least remove the
-    # password to prevent leaking it).
-    # TODO: Use compose v3 format "secrets" for the password? backup container
-    # does not seem to support passing a filename, though.
-    #environment:
-    #  MARIADB_AUTO_UPGRADE: 1
-    #  MYSQL_USER: nextcloud
-    #  MYSQL_PASSWORD: password
-    #  MYSQL_DATABASE: nextcloud
-    #  MYSQL_RANDOM_ROOT_PASSWORD: 1
+    environment:
+      # This enables db upgrades when needed. Seems there is no harm in keeping
+      #this enabled.
+      MARIADB_AUTO_UPGRADE: 1
+      # These are only used on the first startup to create the initial database
+      # and user. Put a random password in the env file before upping this.
+      # After the first run, these can be disabled again (at least remove the
+      # password to prevent leaking it).
+      # TODO: Use compose v3 format "secrets" for the password? backup container
+      # does not seem to support passing a filename, though.
+      # MYSQL_USER: nextcloud
+      # MYSQL_PASSWORD: password
+      # MYSQL_DATABASE: nextcloud
+      # MYSQL_RANDOM_ROOT_PASSWORD: 1
     #env_file:
     # - mysql-pw.env
 
