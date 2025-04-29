@@ -41,7 +41,7 @@ services:
     # - mysql-pw.env
     volumes:
       - code:/var/www/html
-      - data:/var/www/html/data
+      - /mnt/nextcloud-data:/var/www/html/data
     depends_on:
       - db
     networks:
@@ -97,7 +97,6 @@ volumes:
   db:
   db-backup:
   code:
-  data:
 
 networks:
   # Connect to nginx and smtp server through their own, existing, networks.
