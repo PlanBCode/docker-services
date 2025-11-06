@@ -7,12 +7,11 @@
 version: '2'
 services:
   nginx:
-    image: nginxproxy/nginx-proxy:1.7.0
+    image: nginxproxy/nginx-proxy:1.9.0
     restart: unless-stopped
     volumes:
      - nginx-certs:/etc/nginx/certs
      - nginx-html:/usr/share/nginx/html
-     - /etc/docker-nginx/htpasswd:/etc/nginx/htpasswd
      - /var/run/docker.sock:/tmp/docker.sock:ro
      # This adds specific files, so the conf.d/default.conf is used from the image (and thus updated on upgrades)
      - ./nginx.conf.d/client_max_body_size.conf:/etc/nginx/conf.d/client_max_body_size.conf:ro
@@ -25,7 +24,7 @@ services:
      - ENABLE_IPV6=true
 
   letsencrypt:
-    image: nginxproxy/acme-companion:2.5.2
+    image: nginxproxy/acme-companion:2.6.1
     restart: unless-stopped
     volumes_from:
      - nginx
