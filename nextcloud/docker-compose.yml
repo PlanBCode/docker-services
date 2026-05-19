@@ -24,7 +24,7 @@ services:
     # - mysql-pw.env
 
   nextcloud:
-    image:  nextcloud:31.0.4-apache
+    image:  nextcloud:33.0.3-apache
     restart: unless-stopped
     environment:
       # Tell Nextcloud that the nginx reverse proxy handles HTTPS
@@ -50,7 +50,7 @@ services:
       smtp-sender:
 
   nextcloud-cron:
-    image:  nextcloud:31.0.4-apache
+    image:  nextcloud:33.0.3-apache
     restart: unless-stopped
     volumes_from:
       - nextcloud
@@ -62,7 +62,7 @@ services:
       smtp-sender:
 
   collabora:
-    image:  collabora/code:24.04.13.3.1
+    image:  collabora/code:25.04.9.4.1
     restart: unless-stopped
     environment:
       domain: nextcloud.planb.coop
@@ -81,6 +81,7 @@ services:
   # This is a bit rough and uncoordinated with the system backup, but
   db-backup:
     image: zeenlym/mariadb-backup
+    restart: unless-stopped
     volumes:
       - db-backup:/backup
     environment:
