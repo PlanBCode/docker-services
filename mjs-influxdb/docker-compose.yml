@@ -3,7 +3,7 @@ version: '3.2'
 services:
 
   influxdb:
-    container_name: influxdb
+    container_name: mjs-influxdb
     image: influxdb:2.7
     volumes:
       - 'influxdb-data:/var/lib/influxdb2'
@@ -18,7 +18,7 @@ services:
     restart: unless-stopped
 
   grafana:
-    container_name: grafana
+    container_name: mjs-grafana
     image: grafana/grafana:10.4.4
     volumes:
         - grafana-data:/var/lib/grafana
@@ -35,9 +35,24 @@ services:
     links:
       - influxdb:influx
     restart: unless-stopped
+    # Env vars here can only be loaded from .env
     command:
       - "cfg:auth.generic_oauth.client_id=${OAUTH_CLIENT_ID}"
       - "cfg:auth.generic_oauth.client_secret=${OAUTH_CLIENT_SECRET}"
+
+  vector:
+    container_name: mjs-vector
+    build:
+      context: vector
+      args:
+        TTN_LW_CLI_VERSION: 3.31.0
+        VECTOR_VERSION: 0.39.0
+    volumes:
+      - ./vector/config.d/:/etc/vector/config.d/
+    env_file: "secrets.env"
+    links:
+      - influxdb:influx
+    #entrypoint: ["/bin/sh", "-c", "sleep 9999"]
 
 networks:
   # Connect to nginx and smtp server through their own, existing, networks.
